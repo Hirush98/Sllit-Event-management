@@ -8,9 +8,15 @@ API_DOC.md
 .env.development.local
 .env.test.local
 .env.production.local
+**/.env
+**/.env.local
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
 
 # Dependencies
 node_modules/
+**/node_modules/
 
 # Logs
 logs
