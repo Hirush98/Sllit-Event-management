@@ -15,17 +15,6 @@
 
 ---
 
-## 👥 Team — Group 279
-
-| #   | Name                  | Registration No. | Role                                              |
-| --- | --------------------- | ---------------- | ------------------------------------------------- |
-| 1   | **B.H. Kavinda**      | IT23399242       | **Project Leader** — Event Lifecycle & Scheduling |
-| 2   | Y.M.K. Wikramasinghe  | IT23411944       | Authentication, QR Attendance & Feedback          |
-| 3   | Munasinghe M.A.E.S    | IT23424982       | Ticket Booking & Merchandise System               |
-| 4   | Wikramasingha W.M.V.U | IT23388116       | Admin Dashboard & User Management                 |
-
----
-
 ## 📌 Overview
 
 The **SLIIT Event Management System** is a full-stack web application that enables SLIIT students, organizers, and administrators to manage university events end-to-end. Built on the **MERN stack** with a **microservice architecture**, the platform provides:
@@ -136,25 +125,6 @@ service    service    service    service     service
 | `feature/even-tickets`   | Munasinghe M.A.E.S    | Tickets, merchandise, orders                       |
 | `feature/venura-admin`   | Wikramasingha W.M.V.U | Admin dashboard, approvals                         |
 
-**Commit message convention:**
-
-```
-feat:     new feature
-fix:      bug fix
-refactor: code restructure without behaviour change
-chore:    config, dependencies, tooling
-docs:     documentation only
-test:     adding or updating tests
-```
-
-Examples:
-
-```bash
-git commit -m "feat: add venue conflict detection to event creation"
-git commit -m "refactor: remove college field from user registration"
-git commit -m "fix: resolve 409 conflict error display in EventForm"
-```
-
 ---
 
 ## 🏁 Getting Started
@@ -228,17 +198,6 @@ docker-compose up --build
 
 ---
 
-## 📅 Development Schedule
-
-| Week | Dates               | Milestone                                                         |
-| ---- | ------------------- | ----------------------------------------------------------------- |
-| 6    | 23 Feb – 1 Mar 2025 | Development begins; college field removed; new event fields added |
-| 7    | 2 – 8 Mar 2025      | UI Business Rules document submitted                              |
-| 8    | 9 – 15 Mar 2025     | Core feature development                                          |
-| 9    | 16 – 22 Mar 2025    | Working demo ready                                                |
-| 10   | 23 – 29 Mar 2025    | Testing, bug fixes, polish                                        |
-| 11   | 30 Mar – 5 Apr 2025 | **Final presentation**                                            |
-
 ---
 
 ## 🔌 Key API Endpoints
@@ -288,14 +247,6 @@ docker-compose up --build
 4. Push and open a Pull Request → `develop`
 5. Hirusha reviews and merges
 6. `develop` → `main` only before milestone demos
-
----
-
-## 📄 License
-
-This project is based on [Univent](https://github.com/AbhishekBalija/Univent) by Abhishek Balija (MIT License).
-Modified and extended by SLIIT ITPM Group 279.
-See [LICENSE.md](LICENSE.md) for the full license text.
 
 ---
 
