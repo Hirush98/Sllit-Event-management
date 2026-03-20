@@ -2,10 +2,10 @@
 
 <div align="center">
 
-![SLIIT Logo](frontend/public/SLIIT.jpg)
+![SLIIT Logo](frontend/public/wiramaya-2024-11.jpeg)
 
 **IT3040 — Information Technology Project Management**
-**BSc (Hons) in Information Technology · Year 3 · Semester 1 · 2025**
+**BSc (Hons) in Information Technology · Year 3 · Semester 2 · 2026**
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg?style=for-the-badge)](LICENSE.md)
 [![Status](https://img.shields.io/badge/Status-In%20Development-yellow?style=for-the-badge)]()
@@ -32,7 +32,7 @@ The **SLIIT Event Management System** is a full-stack web application that enabl
 
 ## ✨ Features by Module
 
-### 🗓️ Event Lifecycle Management — B.H. Kavinda (IT23399242)
+### 🗓️ Event Lifecycle Management
 
 - Organizers submit events with **venue, date, start time, and duration**
 - **Automatic conflict detection**: if the venue is already booked at the requested time, the system returns the conflicting event's details and blocks the submission
@@ -41,7 +41,7 @@ The **SLIIT Event Management System** is a full-stack web application that enabl
 - Event **status lifecycle**: `Pending → Approved → Completed / Cancelled`
 - Admin-only status update endpoint with optional cancellation reason
 
-### 🔐 Authentication, QR & Feedback — Y.M.K. Wikramasinghe (IT23411944)
+### 🔐 Authentication, QR & Feedback
 
 - Secure user registration and login using **JWT tokens** (access + refresh)
 - **Google OAuth** sign-in (single step — no college prompt)
@@ -50,14 +50,14 @@ The **SLIIT Event Management System** is a full-stack web application that enabl
 - QR **attendance scanning** at event entrance
 - **Star rating feedback** system (1–5 stars) with optional anonymous mode
 
-### 🎫 Tickets & Merchandise — Munasinghe M.A.E.S (IT23424982)
+### 🎫 Tickets & Merchandise
 
 - Book free or paid event tickets; each ticket has a **unique QR code**
 - **Ticket verification** scan prevents duplicate entry
 - **Merchandise catalog** with stock management
 - Order tracking: `Placed → Processing → Ready for Pickup → Completed`
 
-### 🛡️ Admin Dashboard — Wikramasingha W.M.V.U (IT23388116)
+### 🛡️ Admin Dashboard
 
 - Overview dashboard: total users, events, pending approvals, revenue
 - **User management**: search, filter, assign roles (Participant / Organizer / Admin)

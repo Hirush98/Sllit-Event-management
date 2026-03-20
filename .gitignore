@@ -3,12 +3,9 @@ GETTING_STARTED.md
 API_DOC.md
 
 # Environment variables
-.env
-.env.local
 .env.development.local
 .env.test.local
 .env.production.local
-**/.env
 **/.env.local
 **/.env.development.local
 **/.env.test.local
@@ -34,7 +31,6 @@ coverage/
 
 # Editor directories and files
 .idea/
-.vscode/
 *.swp
 *.swo
 
@@ -53,3 +49,4 @@ Thumbs.db
 # Temporary files
 tmp/
 temp/
+config.bat
