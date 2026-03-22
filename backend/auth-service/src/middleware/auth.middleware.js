@@ -7,7 +7,6 @@ const User = require('../models/User');
 exports.protect = async (req, res, next) => {
   try {
     let token;
-
     // Check if token exists in Authorization header
     if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
       // Extract token from Bearer token string
