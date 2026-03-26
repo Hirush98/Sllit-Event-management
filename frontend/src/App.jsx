@@ -34,7 +34,7 @@ function App() {
         <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
         
         {/* Redirect root to login page */}
-        <Route path="/" element={<Navigate to="/login" replace />} />
+        <Route path="/" element={<Navigate to="/register" replace />} />
         
         {/* Protected routes with layout */}
         <Route element={<ProtectedRoute />}>

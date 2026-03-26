@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI_SETTINGS || 'mongodb://localhost:27017/eventflow_settings', {
+    const conn = await mongoose.connect(process.env.MONGODB_URK || 'mongodb://localhost:27017/eventflow_settings', {
       useNewUrlParser: true,
       useUnifiedTopology: true,
     });

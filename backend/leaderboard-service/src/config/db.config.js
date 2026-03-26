@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
  */
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI_LEADERBOARD || 'mongodb://localhost:27017/eventflow_leaderboard');
+    const conn = await mongoose.connect(process.env.MONGODB_URK || 'mongodb://localhost:27017/eventflow_leaderboard');
     console.log(`MongoDB Connected: ${conn.connection.host}`);
     return conn;
   } catch (error) {
