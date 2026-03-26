@@ -3,18 +3,6 @@ const bcrypt = require('bcryptjs');
 const crypto = require('crypto');
 
 const userSchema = new mongoose.Schema({
-  firstName: {
-    type: String,
-    required: [true, 'First name is required'],
-    trim: true,
-    minlength: 2
-  },
-  lastName: {
-    type: String,
-    required: [true, 'Last name is required'],
-    trim: true,
-    minlength: 2
-  },
   email: {
     type: String,
     required: [true, 'Email is required'],
@@ -23,16 +11,25 @@ const userSchema = new mongoose.Schema({
     lowercase: true,
     match: [/^\S+@\S+\.\S+$/, 'Please use a valid email address']
   },
-  password: {
+  studentId: {
     type: String,
-    required: [true, 'Password is required'],
-    minlength: 8,
-    select: false // Don't return password by default in queries
+    required: true,
+    unique: true
   },
-  college: {
+  name: {
     type: String,
-    required: [true, 'College name is required'],
-    trim: true
+    required: [true, 'First name is required'],
+    trim: true,
+    minlength: 2
+  },
+  address: {
+    type: String,
+    required: [true, 'Address is required']
+  },
+  mobileNo: {
+    type: String,
+    required: [true, 'Mobile number is required'],
+    match: [/^\d{10}$/, 'Mobile number must be exactly 10 digits']
   },
   role: {
     type: String,
@@ -47,27 +44,19 @@ const userSchema = new mongoose.Schema({
     type: Date,
     default: Date.now
   },
-  resetPasswordToken: {
-    type: String,
-    select: false
-  },
-  resetPasswordExpire: {
-    type: Date,
-    select: false
-  }
 });
 
 // Update the updatedAt field on save
-userSchema.pre('save', function(next) {
+userSchema.pre('save', function (next) {
   this.updatedAt = Date.now();
   next();
 });
 
 // Hash password before saving
-userSchema.pre('save', async function(next) {
+userSchema.pre('save', async function (next) {
   // Only hash the password if it's modified (or new)
   if (!this.isModified('password')) return next();
-  
+
   try {
     // Generate salt
     const salt = await bcrypt.genSalt(10);
@@ -80,7 +69,7 @@ userSchema.pre('save', async function(next) {
 });
 
 // Method to compare password
-userSchema.methods.comparePassword = async function(candidatePassword) {
+userSchema.methods.comparePassword = async function (candidatePassword) {
   try {
     return await bcrypt.compare(candidatePassword, this.password);
   } catch (error) {
@@ -89,31 +78,31 @@ userSchema.methods.comparePassword = async function(candidatePassword) {
 };
 
 // Generate password reset token
-userSchema.methods.generateResetToken = function() {
+userSchema.methods.generateResetToken = function () {
   // Generate random token
   const resetToken = crypto.randomBytes(32).toString('hex');
-  
+
   // Hash token and set to resetPasswordToken field
   this.resetPasswordToken = crypto
     .createHash('sha256')
     .update(resetToken)
     .digest('hex');
-  
+
   // Set token expiry (30 minutes)
   this.resetPasswordExpire = Date.now() + 30 * 60 * 1000;
-  
+
   // Return unhashed token (to be sent via email)
   return resetToken;
 };
 
 // Validate reset token
-userSchema.methods.validateResetToken = function(token) {
+userSchema.methods.validateResetToken = function (token) {
   // Hash the provided token
   const hashedToken = crypto
     .createHash('sha256')
     .update(token)
     .digest('hex');
-  
+
   // Check if token matches and is not expired
   return (
     this.resetPasswordToken === hashedToken &&

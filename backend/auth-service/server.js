@@ -5,6 +5,9 @@ const helmet = require('helmet');
 const dotenv = require('dotenv');
 const rateLimit = require('express-rate-limit');
 
+const dns = require('node:dns');
+dns.setServers(['8.8.8.8', '1.1.1.1']); // Uses Google and Cloudflare DNS
+
 // Load environment variables
 dotenv.config();
 

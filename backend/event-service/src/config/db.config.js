@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 
 const connectDB = async () => {
   try {
-    const conn = await mongoose.connect(process.env.MONGODB_URI_EVENT, {
+    const conn = await mongoose.connect(process.env.MONGODB_URK, {
       // These options are no longer needed in Mongoose 8
       // useNewUrlParser: true,
       // useUnifiedTopology: true,

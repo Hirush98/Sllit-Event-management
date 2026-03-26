@@ -18,7 +18,8 @@ import {
   EditAnnouncementPage,
   LeaderboardPage,
   SettingsPage,
-  SystemSettingsPage
+  SystemSettingsPage,
+  MSRegister
 } from './pages';
 import { ProtectedRoute } from './components/auth';
 
@@ -28,7 +29,7 @@ function App() {
       <Routes>
         {/* Public routes */}
         <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route path="/register" element={<MSRegister />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
         
@@ -37,6 +38,7 @@ function App() {
         
         {/* Protected routes with layout */}
         <Route element={<ProtectedRoute />}>
+        
           <Route path="/home" element={<Layout />}>
             <Route index element={<HomePage />} />
             <Route path="dashboard" element={<h1 className="text-4xl font-bold mb-6">Dashboard</h1>} />

@@ -5,6 +5,7 @@ import { useAuth } from '../../context';
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
 
 const RegisterForm = ({ onSuccess }) => {
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const { register, googleLogin } = useAuth();
@@ -14,7 +15,7 @@ const RegisterForm = ({ onSuccess }) => {
   // eslint-disable-next-line no-unused-vars
   const [googleProfile, setGoogleProfile] = useState(null);
 
-  const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  //const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
 
   const registerSchema = Yup.object().shape({
     firstName: Yup.string()
@@ -56,14 +57,14 @@ const RegisterForm = ({ onSuccess }) => {
     onSubmit: async (values) => {
       setIsLoading(true);
       setError(null);
-      
+
       try {
         // Remove confirmPassword and acceptTerms from the data sent to the API
         const { confirmPassword: _confirmPassword, acceptTerms: _acceptTerms, ...registrationData } = values;
-        
+
         // Call the register function from AuthContext
         await register(registrationData);
-        
+
         // Call the success callback if provided
         if (onSuccess) {
           onSuccess();
@@ -78,6 +79,7 @@ const RegisterForm = ({ onSuccess }) => {
   });
 
   // Google signup handler
+  /*
   const handleGoogleSuccess = async (credentialResponse) => {
     setIsLoading(true);
     setError(null);
@@ -97,6 +99,7 @@ const RegisterForm = ({ onSuccess }) => {
       setIsLoading(false);
     }
   };
+  */
 
   const handleCollegeSubmit = async (e) => {
     e.preventDefault();
@@ -144,11 +147,10 @@ const RegisterForm = ({ onSuccess }) => {
               type="text"
               name="firstName"
               placeholder="Enter your first name"
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                formik.touched.firstName && formik.errors.firstName
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${formik.touched.firstName && formik.errors.firstName
                   ? "border-red-500 focus:ring-red-200"
                   : "border-gray-300 focus:ring-blue-200"
-              }`}
+                }`}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               value={formik.values.firstName}
@@ -173,11 +175,10 @@ const RegisterForm = ({ onSuccess }) => {
               type="text"
               name="lastName"
               placeholder="Enter your last name"
-              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                formik.touched.lastName && formik.errors.lastName
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${formik.touched.lastName && formik.errors.lastName
                   ? "border-red-500 focus:ring-red-200"
                   : "border-gray-300 focus:ring-blue-200"
-              }`}
+                }`}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               value={formik.values.lastName}
@@ -203,11 +204,10 @@ const RegisterForm = ({ onSuccess }) => {
             type="email"
             name="email"
             placeholder="Enter your email"
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-              formik.touched.email && formik.errors.email
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${formik.touched.email && formik.errors.email
                 ? "border-red-500 focus:ring-red-200"
                 : "border-gray-300 focus:ring-blue-200"
-            }`}
+              }`}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             value={formik.values.email}
@@ -230,11 +230,10 @@ const RegisterForm = ({ onSuccess }) => {
             type="text"
             name="college"
             placeholder="Enter your college or university"
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-              formik.touched.college && formik.errors.college
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${formik.touched.college && formik.errors.college
                 ? "border-red-500 focus:ring-red-200"
                 : "border-gray-300 focus:ring-blue-200"
-            }`}
+              }`}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             value={formik.values.college}
@@ -257,11 +256,10 @@ const RegisterForm = ({ onSuccess }) => {
             type="password"
             name="password"
             placeholder="Create a password"
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-              formik.touched.password && formik.errors.password
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${formik.touched.password && formik.errors.password
                 ? "border-red-500 focus:ring-red-200"
                 : "border-gray-300 focus:ring-blue-200"
-            }`}
+              }`}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             value={formik.values.password}
@@ -286,11 +284,10 @@ const RegisterForm = ({ onSuccess }) => {
             type="password"
             name="confirmPassword"
             placeholder="Confirm your password"
-            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-              formik.touched.confirmPassword && formik.errors.confirmPassword
+            className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${formik.touched.confirmPassword && formik.errors.confirmPassword
                 ? "border-red-500 focus:ring-red-200"
                 : "border-gray-300 focus:ring-blue-200"
-            }`}
+              }`}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             value={formik.values.confirmPassword}
@@ -370,7 +367,7 @@ const RegisterForm = ({ onSuccess }) => {
           )}
         </button>
       </form>
-
+      {/*
       <div className="flex justify-center mt-6">
         <GoogleOAuthProvider clientId={clientId}>
           <GoogleLogin
@@ -380,7 +377,7 @@ const RegisterForm = ({ onSuccess }) => {
           />
         </GoogleOAuthProvider>
       </div>
-
+      */}
       {showCollegePrompt && (
         <form onSubmit={handleCollegeSubmit} className="mt-4">
           <div className="mb-2">

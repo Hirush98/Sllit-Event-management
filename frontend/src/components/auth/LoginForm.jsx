@@ -4,8 +4,10 @@ import * as Yup from 'yup';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context';
 import { GoogleLogin, GoogleOAuthProvider } from '@react-oauth/google';
+import { useMsal } from "@azure/msal-react";
 
 const LoginForm = ({ onSuccess }) => {
+
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const { login, googleLogin } = useAuth();
@@ -16,6 +18,8 @@ const LoginForm = ({ onSuccess }) => {
   const [googleProfile, setGoogleProfile] = useState(null);
 
   const clientId = import.meta.env.VITE_GOOGLE_CLIENT_ID;
+  
+  const { instance } = useMsal();
 
   const loginSchema = Yup.object().shape({
     email: Yup.string()
@@ -27,11 +31,14 @@ const LoginForm = ({ onSuccess }) => {
   });
 
   const formik = useFormik({
+
     initialValues: {
       email: '',
       password: ''
     },
+
     validationSchema: loginSchema,
+
     onSubmit: async (values) => {
       setIsLoading(true);
       setError(null);
@@ -44,9 +51,25 @@ const LoginForm = ({ onSuccess }) => {
       } finally {
         setIsLoading(false);
       }
+
     },
   });
 
+
+  const handleMicrosoftLogin = async () => {
+    try {
+      const response = await instance.loginPopup({
+    scopes: ["user.read"],
+    prompt: "login"   // 👈 add this here
+  });
+
+      console.log("USER:", response.account);
+      console.log("TOKEN:", response.idToken);
+
+    } catch (error) {
+      console.error("Login failed:", error);
+    }
+  };
   // Google login handler
   const handleGoogleSuccess = async (credentialResponse) => {
     setIsLoading(true);
@@ -139,11 +162,10 @@ const LoginForm = ({ onSuccess }) => {
                 type="email"
                 name="email"
                 placeholder="Enter your email"
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                  formik.touched.email && formik.errors.email
-                    ? "border-red-500 focus:ring-red-200"
-                    : "border-gray-300 focus:ring-blue-200"
-                }`}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${formik.touched.email && formik.errors.email
+                  ? "border-red-500 focus:ring-red-200"
+                  : "border-gray-300 focus:ring-blue-200"
+                  }`}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.email}
@@ -168,11 +190,10 @@ const LoginForm = ({ onSuccess }) => {
                 type="password"
                 name="password"
                 placeholder="Enter your password"
-                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${
-                  formik.touched.password && formik.errors.password
-                    ? "border-red-500 focus:ring-red-200"
-                    : "border-gray-300 focus:ring-blue-200"
-                }`}
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 ${formik.touched.password && formik.errors.password
+                  ? "border-red-500 focus:ring-red-200"
+                  : "border-gray-300 focus:ring-blue-200"
+                  }`}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
                 value={formik.values.password}
@@ -250,10 +271,14 @@ const LoginForm = ({ onSuccess }) => {
               <GoogleLogin
                 onSuccess={handleGoogleSuccess}
                 onError={() => setError("Google login failed")}
-               
+
               />
             </GoogleOAuthProvider>
           </div>
+
+          <button onClick={handleMicrosoftLogin} className="w-full mt-4 bg-gray-800 text-white py-2 px-4 rounded-md hover:bg-gray-900 transition duration-200">
+            Login with Microsoft
+          </button>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-black">

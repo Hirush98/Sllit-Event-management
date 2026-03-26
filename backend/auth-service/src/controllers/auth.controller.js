@@ -4,12 +4,98 @@ const { generateToken, generateRefreshToken, verifyRefreshToken } = require('../
 const { sendPasswordResetEmail } = require('../utils/email.utils');
 const crypto = require('crypto');
 const { OAuth2Client } = require('google-auth-library');
+const { verifyMicrosoftToken } = require('../utils/verifyMicrosoftToken');
+
+exports.microsoftAuth = async (req, res) => {
+  try {
+    const { idToken } = req.body;
+    const decoded = await verifyMicrosoftToken(idToken);
+    const email = decoded.preferred_username;
+
+    // 🔒 Validate domain
+    /*if (!email.endsWith('@my.sliit.lk')) {
+      return res.status(403).json({ message: 'Invalid email domain' });
+    }*/
+
+    if (!email.endsWith('@gmail.com')) {
+      return res.status(403).json({ message: 'Invalid email domain' });
+    }
+
+    const user = await User.findOne({ email });
+
+    if (user) {
+      const token = generateToken(user);
+      const refreshToken = generateRefreshToken(user);
+
+      return res.json({
+        isNewUser: false,
+        user,
+        token,
+        refreshToken
+      });
+    }
+
+    return res.json({
+      isNewUser: true,
+      email
+    });
+
+  } catch (err) {
+    return res.status(401).json({ message: 'Invalid Microsoft token' });
+  }
+};
+
+exports.registerUser = async (req, res) => {
+  try {
+    const { idToken, studentId, name, address, mobileNo } = req.body;
+
+    const decoded = await verifyMicrosoftToken(idToken);
+
+    const email = decoded.preferred_username;
+    console.log("data received for registration:", { email, studentId, name, address, mobileNo });
+
+    /**if (!email.endsWith('@my.sliit.lk')) {
+      return res.status(403).json({ message: 'Invalid email domain' });
+    }*/
+
+    if (!email.endsWith('@gmail.com')) {
+      return res.status(403).json({ message: 'Invalid email domain' });
+    }
+
+    const existingUser = await User.findOne({ email });
+
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+
+    const user = await User.create({
+      email,
+      studentId,
+      name,
+      address,
+      mobileNo
+    });
+
+    const token = generateToken(user);
+    const refreshToken = generateRefreshToken(user);
+
+    res.json({
+      user,
+      token,
+      refreshToken
+    });
+
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+};
 
 /**
  * @desc    Register a new user
  * @route   POST /api/auth/register
  * @access  Public
  */
+
 exports.register = async (req, res, next) => {
   try {
     const { firstName, lastName, email, password, college } = req.body;
@@ -67,35 +153,36 @@ exports.register = async (req, res, next) => {
  */
 exports.updateProfile = async (req, res, next) => {
   try {
-    const { firstName, lastName, college } = req.body;
-    
+    const { name, address, mobileNo } = req.body;
+
     // Find user by ID
     const user = await User.findById(req.user._id);
-    
+
     if (!user) {
       return res.status(404).json({
         success: false,
         message: 'User not found'
       });
     }
-    
+
     // Update user fields
-    if (firstName) user.firstName = firstName;
-    if (lastName) user.lastName = lastName;
-    if (college) user.college = college;
-    
+    if (name) user.name = name;
+    if (address) user.address = address;
+    if (mobileNo) user.mobileNo = mobileNo;
+
     // Save updated user
     await user.save();
-    
+
     res.status(200).json({
       success: true,
       message: 'Profile updated successfully',
       user: {
         id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
         email: user.email,
-        college: user.college,
+        studentId: user.studentId,
+        name: user.name,
+        address: user.address,
+        mobileNo: user.mobileNo,
         role: user.role
       }
     });
@@ -176,10 +263,11 @@ exports.getCurrentUser = async (req, res, next) => {
       success: true,
       user: {
         id: user._id,
-        firstName: user.firstName,
-        lastName: user.lastName,
         email: user.email,
-        college: user.college,
+        studentId: user.studentId,
+        name: user.name,
+        address: user.address,
+        mobileNo: user.mobileNo,
         role: user.role
       }
     });
@@ -288,9 +376,9 @@ exports.forgotPassword = async (req, res, next) => {
     // Create reset URL
     // In production, this would be your frontend URL
     const resetUrl = `https://univento.vercel.app/reset-password/${resetToken}`;
-    
+
     // For development, we'll also include a frontend URL for testing
-    const frontendResetUrl = process.env.NODE_ENV === 'production' 
+    const frontendResetUrl = process.env.NODE_ENV === 'production'
       ? resetUrl
       : `http://localhost:5173/reset-password/${resetToken}`;
 

@@ -4,17 +4,18 @@ import { useAuth } from '../context';
 import { authService } from '../services';
 
 const ProfilePage = () => {
-  const { user } = useAuth();
+  const { user, updateProfile } = useAuth();
   const navigate = useNavigate();
   const [profileData, setProfileData] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
-    firstName: '',
-    lastName: '',
-    email: '',
-    college: ''
+    email: "",
+    studentId: "",
+    name: "",
+    address: "",
+    mobileNo: ""
   });
   const [updateSuccess, setUpdateSuccess] = useState(false);
 
@@ -35,11 +36,13 @@ const ProfilePage = () => {
         const response = await authService.getCurrentUser();
         setProfileData(response.user);
         setFormData({
-          firstName: response.user.firstName,
-          lastName: response.user.lastName,
           email: response.user.email,
-          college: response.user.college
+          studentId: response.user.studentId,
+          name: response.user.name,
+          address: response.user.address,
+          mobileNo: response.user.mobileNo
         });
+        console.log("Fetched profile data:", response.user.mobileNo);
         setError(null);
       } catch (err) {
         setError(err.message || 'Failed to fetch profile data');
@@ -65,13 +68,13 @@ const ProfilePage = () => {
     e.preventDefault();
     try {
       // Call the updateProfile endpoint
-      const response = await authService.updateProfile(formData);
-      
+      const response = await updateProfile(formData);
+
       // Update local profile data with the response
       setProfileData(response.user);
       setUpdateSuccess(true);
       setIsEditing(false);
-      
+
       // Clear success message after 3 seconds
       setTimeout(() => {
         setUpdateSuccess(false);
@@ -167,88 +170,120 @@ const ProfilePage = () => {
                   Profile updated successfully!
                 </div>
               )}
-              
+
               {/* Profile information */}
               <div className="flex flex-col md:flex-row">
                 <div className="md:w-1/3 mb-6 md:mb-0">
                   <div className="flex flex-col items-center">
                     {user.photo ? (
-                      <img 
-                        src={user.photo} 
-                        alt="Profile" 
+                      <img
+                        src={user.photo}
+                        alt="Profile"
                         className="w-32 h-32 rounded-full object-cover mb-4"
                       />
                     ) : (
                       <div className="w-32 h-32 bg-gray-300 rounded-full flex items-center justify-center mb-4">
                         <span className="text-4xl font-bold text-gray-600">
-                          {profileData.firstName.charAt(0)}{profileData.lastName.charAt(0)}
+                          {profileData.name.charAt(0)}
                         </span>
                       </div>
                     )}
                     <h2 className="text-xl font-semibold text-gray-800">
-                      {profileData.firstName} {profileData.lastName}
+                      {profileData.name}
                     </h2>
                     <span className={`mt-2 py-1 px-3 rounded-full text-xs ${profileData.role === 'admin' ? 'bg-purple-200 text-purple-800' : profileData.role === 'organizer' ? 'bg-blue-200 text-blue-800' : 'bg-green-200 text-green-800'}`}>
                       {profileData.role.charAt(0).toUpperCase() + profileData.role.slice(1)}
                     </span>
                   </div>
                 </div>
-                
+
                 <div className="md:w-2/3">
                   {isEditing ? (
                     <form onSubmit={handleSubmit} className="space-y-4">
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                          <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">First Name</label>
-                          <input
-                            type="text"
-                            id="firstName"
-                            name="firstName"
-                            value={formData.firstName}
-                            onChange={handleInputChange}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                            required
-                          />
-                        </div>
-                        <div>
-                          <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-1">Last Name</label>
-                          <input
-                            type="text"
-                            id="lastName"
-                            name="lastName"
-                            value={formData.lastName}
-                            onChange={handleInputChange}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                            required
-                          />
-                        </div>
-                      </div>
+
+                      {/* Student ID */}
                       <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                        <label htmlFor="studentId" className="block text-sm font-medium text-gray-700 mb-1">Student ID</label>
+                        <input
+                          type="text"
+                          id="studentId"
+                          name="studentId"
+                          value={formData.studentId}
+                          onChange={handleInputChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          required
+                          disabled
+                        />
+                        <p className="text-xs text-gray-500 mt-1">Student ID cannot be changed</p>
+                      </div>
+
+                      {/* Email */}
+                      <div>
+                        <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+                          Email
+                        </label>
+
                         <input
                           type="email"
                           id="email"
                           name="email"
                           value={formData.email}
                           onChange={handleInputChange}
+                          autoComplete="email"   // ✅ FIX
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                           required
                           disabled
                         />
-                        <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
+
+                        <p className="text-xs text-gray-500 mt-1">
+                          Email cannot be changed
+                        </p>
                       </div>
+
+                      {/* Student ID and Email are not editable */}
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                          <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                          <input
+                            type="text"
+                            id="name"
+                            name="name"
+                            value={formData.name}
+                            onChange={handleInputChange}
+                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      {/* Address */}
                       <div>
-                        <label htmlFor="college" className="block text-sm font-medium text-gray-700 mb-1">College</label>
+                        <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">Address</label>
                         <input
                           type="text"
-                          id="college"
-                          name="college"
-                          value={formData.college}
+                          id="address"
+                          name="address"
+                          value={formData.address}
                           onChange={handleInputChange}
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                           required
                         />
                       </div>
+
+                      {/* Mobile Number */}
+                      <div>
+                        <label htmlFor="MobileNo" className="block text-sm font-medium text-gray-700 mb-1">Mobile Number</label>
+                        <input
+                          type="tel"
+                          id="mobileNo"
+                          name="mobileNo"   // ✅ FIXED
+                          value={formData.mobileNo}
+                          onChange={handleInputChange}
+                          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
+                          required
+                        />
+                      </div>
+
                       <div className="flex space-x-4">
                         <button
                           type="submit"
@@ -269,21 +304,25 @@ const ProfilePage = () => {
                     <div className="space-y-4">
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                          <h3 className="text-sm font-medium text-gray-500">First Name</h3>
-                          <p className="mt-1 text-lg text-gray-800">{profileData.firstName}</p>
+                          <h3 className="text-sm font-medium text-gray-500">Student Id:</h3>
+                          <p className="mt-1 text-lg text-gray-800">{profileData.studentId}</p>
                         </div>
                         <div>
-                          <h3 className="text-sm font-medium text-gray-500">Last Name</h3>
-                          <p className="mt-1 text-lg text-gray-800">{profileData.lastName}</p>
+                          <h3 className="text-sm font-medium text-gray-500">Name:</h3>
+                          <p className="mt-1 text-lg text-gray-800">{profileData.name}</p>
                         </div>
                       </div>
                       <div>
-                        <h3 className="text-sm font-medium text-gray-500">Email</h3>
+                        <h3 className="text-sm font-medium text-gray-500">Email: </h3>
                         <p className="mt-1 text-lg text-gray-800">{profileData.email}</p>
                       </div>
                       <div>
-                        <h3 className="text-sm font-medium text-gray-500">College</h3>
-                        <p className="mt-1 text-lg text-gray-800">{profileData.college}</p>
+                        <h3 className="text-sm font-medium text-gray-500">Address:</h3>
+                        <p className="mt-1 text-lg text-gray-800">{profileData.address}</p>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-500">Mobile Number:</h3>
+                        <p className="mt-1 text-lg text-gray-800">{profileData.mobileNo}</p>
                       </div>
                       <div>
                         <button
@@ -297,7 +336,7 @@ const ProfilePage = () => {
                   )}
                 </div>
               </div>
-              
+
               {/* Role-specific information */}
               {renderRoleSpecificInfo()}
             </div>

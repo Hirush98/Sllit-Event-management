@@ -9,8 +9,7 @@ exports.generateToken = (user) => {
   return jwt.sign(
     { 
       id: user._id,
-      role: user.role,
-      college: user.college
+      role: user.role
     },
     process.env.JWT_SECRET,
     { expiresIn: process.env.JWT_EXPIRE || '1d' }

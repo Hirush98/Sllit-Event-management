@@ -5,6 +5,7 @@ import { authService } from '../../services';
 const ProtectedRoute = () => {
   const { user, loading } = useAuth();
   const location = useLocation();
+  
   // Check if user is authenticated using authService
   const isAuthenticated = authService.isAuthenticated() && !!user;
 

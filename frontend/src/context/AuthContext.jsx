@@ -6,6 +6,7 @@ import { setUser as setReduxUser, setLoading as setReduxLoading, setError as set
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
+
   const dispatch = useDispatch();
   const { user, loading, error, isAuthenticated } = useSelector(state => state.auth);
 
@@ -40,13 +41,49 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     dispatch(setReduxLoading(true));
     dispatch(setReduxError(null));
-    
     try {
       // Call the auth service register method
       const response = await authService.register(userData);
       return response;
+      
     } catch (err) {
       dispatch(setReduxError(err.message || 'Failed to register'));
+      throw err;
+    } finally {
+      dispatch(setReduxLoading(false));
+    }
+  };
+
+  const registerV2 = async (userData) => {
+    dispatch(setReduxLoading(true));
+    dispatch(setReduxError(null));
+    
+    try {
+      // Call the auth service register method
+      const response = await authService.registerV2(userData);
+      dispatch(setReduxUser(response.user));
+      
+      return response;
+    } catch (err) {
+      dispatch(setReduxError(err.message || 'Failed to register'));
+      throw err;
+    } finally {
+      dispatch(setReduxLoading(false));
+    }
+  };
+
+  const updateProfile = async (profileData) => {
+    dispatch(setReduxLoading(true));
+    dispatch(setReduxError(null));
+    
+    try {
+      // Call the auth service updateProfile method
+      const response = await authService.updateProfile(profileData);
+      dispatch(setReduxUser(response.user));
+      
+      return response;
+    } catch (err) {
+      dispatch(setReduxError(err.message || 'Failed to update profile'));
       throw err;
     } finally {
       dispatch(setReduxLoading(false));
@@ -77,15 +114,39 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Microsoft OAuth login/signup
+  const microsoftLogin = async (idToken) => {
+    dispatch(setReduxLoading(true));
+    dispatch(setReduxError(null));
+
+    try {
+      const response = await authService.microsoftLogin(idToken);
+
+      if (response.user) {
+        dispatch(setReduxUser(response.user));
+      }
+
+      return response;
+    } catch (err) {
+      dispatch(setReduxError(err.message));
+      throw err;
+    } finally {
+      dispatch(setReduxLoading(false));
+    }
+  };
+
   const value = {
     user,
     loading,
     error,
     login,
     register,
+    registerV2,
+    microsoftLogin,
     logout,
     isAuthenticated,
-    googleLogin
+    googleLogin,
+    updateProfile
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

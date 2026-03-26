@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Base URL for auth service
-const API_URL =  'http://localhost:8001/api/auth';
+const API_URL = 'http://localhost:8001/api/auth';
 // const API_URL = 'http://localhost:8001/api/auth';
 
 // Create axios instance with default config
@@ -35,7 +35,20 @@ const authService = {
       throw new Error(error.response?.data?.message || 'Registration failed');
     }
   },
-  
+
+  // Register a new user v2
+  registerV2: async (data) => {
+    try {
+      const res = await authApi.post('/registerV2', data);
+      if (res.data.token) {
+        localStorage.setItem('token', res.data.token);
+      }
+      return res.data;
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Registration failed');
+    }
+  },
+
   // Update user profile
   updateProfile: async (profileData) => {
     try {
@@ -50,16 +63,33 @@ const authService = {
   login: async (email, password) => {
     try {
       const response = await authApi.post('/login', { email, password });
-      
+
       // Store token in localStorage
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
       }
-      
+
       return response.data;
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Login failed');
     }
+  },
+
+  // MicrosoftLogin OAuth login/signup
+  microsoftLogin: async (idToken) => {
+    try {
+      const res = await authApi.post('/microsoft', { idToken });
+
+      if (res.data.token) {
+        localStorage.setItem('token', res.data.token);
+      }
+
+      return res.data;
+
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Login failed');
+    }
+
   },
 
   // Logout user
@@ -92,12 +122,12 @@ const authService = {
   resetPassword: async (token, password) => {
     try {
       const response = await authApi.post(`/reset-password/${token}`, { password });
-      
+
       // If reset is successful and returns tokens, store them
       if (response.data.token) {
         localStorage.setItem('token', response.data.token);
       }
-      
+
       return response.data;
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Failed to reset password');

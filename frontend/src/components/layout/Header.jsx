@@ -57,11 +57,11 @@ const Header = ({ toggleSidebar }) => {
                   />
                 ) : (
                   <div className="h-8 w-8 rounded-full bg-blue-400 flex items-center justify-center font-semibold uppercase">
-                    {user.firstName?.charAt(0) || "U"}
+                    {user.name?.charAt(0) || "U"}
                   </div>
                 )}
                 <span className="hidden md:inline font-medium">
-                  {user.firstName || "User"}
+                  {user.name || "User"}
                 </span>
               </Link>
               <button

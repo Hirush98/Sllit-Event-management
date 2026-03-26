@@ -8,9 +8,12 @@ const {
   forgotPassword,
   resetPassword,
   updateProfile,
-  googleAuth
+  googleAuth,
+  microsoftAuth,
+  registerUser
 } = require('../controllers/auth.controller');
 const { protect } = require('../middleware/auth.middleware');
+
 
 const router = express.Router();
 
@@ -26,5 +29,9 @@ router.post('/google', googleAuth);
 router.get('/me', protect, getCurrentUser);
 router.post('/logout', protect, logout);
 router.put('/profile', protect, updateProfile);
+
+// MS login
+router.post('/microsoft', microsoftAuth);
+router.post('/registerV2', registerUser);
 
 module.exports = router;
