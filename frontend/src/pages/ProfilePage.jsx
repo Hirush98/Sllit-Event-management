@@ -19,14 +19,15 @@ const ProfilePage = () => {
   });
   const [updateSuccess, setUpdateSuccess] = useState(false);
 
-  // Redirect if user is not logged in
+  // ✅ ADDED
+  const [errors, setErrors] = useState({});
+
   useEffect(() => {
     if (!user) {
       navigate('/login');
     }
   }, [user, navigate]);
 
-  // Fetch user profile data
   useEffect(() => {
     const fetchProfileData = async () => {
       if (!user) return;
@@ -54,34 +55,73 @@ const ProfilePage = () => {
     fetchProfileData();
   }, [user]);
 
-  // Handle form input changes
+  // ✅ UPDATED (logic only)
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+
+    let cleanedValue = value;
+
+    if (name === "name") {
+      cleanedValue = value.replace(/[^A-Za-z ]/g, "");
+    }
+
+    if (name === "address") {
+      cleanedValue = value.replace(/[^A-Za-z0-9,/ ]/g, "");
+    }
+
+    if (name === "mobileNo") {
+      cleanedValue = value.replace(/[^0-9]/g, "").slice(0, 10);
+    }
+
     setFormData({
       ...formData,
-      [name]: value
+      [name]: cleanedValue
+    });
+
+    setErrors({
+      ...errors,
+      [name]: ""
     });
   };
 
-  // Handle form submission
+  // ✅ ADDED
+  const validateAll = () => {
+    let newErrors = {};
+
+    if (!/^[A-Za-z ]+$/.test(formData.name)) {
+      newErrors.name = "Only letters and spaces allowed";
+    }
+
+    if (!/^[A-Za-z0-9,/ ]+$/.test(formData.address)) {
+      newErrors.address = "Only letters, numbers, comma, / and spaces allowed";
+    }
+
+    if (!/^[0-9]{10}$/.test(formData.mobileNo)) {
+      newErrors.mobileNo = "Mobile number must be exactly 10 digits";
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    // ✅ ADDED
+    if (!validateAll()) return;
+
     try {
-      // Call the updateProfile endpoint
       const response = await updateProfile(formData);
 
-      // Update local profile data with the response
       setProfileData(response.user);
       setUpdateSuccess(true);
       setIsEditing(false);
 
-      // Clear success message after 3 seconds
       setTimeout(() => {
         setUpdateSuccess(false);
       }, 3000);
     } catch (error) {
       setError(error.message || 'Failed to update profile');
-      // Clear error message after 3 seconds
       setTimeout(() => {
         setError(null);
       }, 3000);
@@ -254,6 +294,7 @@ const ProfilePage = () => {
                             required
                           />
                         </div>
+                        {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name}</p>}
                       </div>
 
                       {/* Address */}
@@ -268,6 +309,7 @@ const ProfilePage = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                           required
                         />
+                        {errors.address && <p className="text-red-500 text-sm mt-1">{errors.address}</p>}
                       </div>
 
                       {/* Mobile Number */}
@@ -282,6 +324,7 @@ const ProfilePage = () => {
                           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
                           required
                         />
+                        {errors.mobileNo && <p className="text-red-500 text-sm mt-1">{errors.mobileNo}</p>}
                       </div>
 
                       <div className="flex space-x-4">
@@ -348,3 +391,10 @@ const ProfilePage = () => {
 };
 
 export default ProfilePage;
+
+/*
+can you add this edditing form inputs some validations.
+Full name feild can have Capital letters and simple letters spaces only. can't have any numbers or simbols or other charactors.
+address feild can have capital letters, simple letters, numbers, comma, / , spaces only. 
+mobile number feild can have numbers only. and total number must be 10. not less or more.
+*/
