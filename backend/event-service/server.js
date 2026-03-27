@@ -10,6 +10,7 @@ dotenv.config();
 
 // Import routes
 const eventRoutes = require("./src/routes/event.routes");
+const feedbackRoutes = require("./src/routes/feedback.routes");
 
 // Import error handler
 const errorHandler = require("./src/middleware/error.middleware");
@@ -60,6 +61,7 @@ connectDB();
 
 // Routes
 app.use("/api/events", eventRoutes);
+app.use("/api/feedback", feedbackRoutes);
 
 // Health check route
 app.get("/health", (req, res) => {

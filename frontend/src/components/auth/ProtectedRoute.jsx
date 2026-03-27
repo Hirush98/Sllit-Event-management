@@ -18,15 +18,15 @@ const ProtectedRoute = () => {
     );
   }
 
-  // Redirect to login if not authenticated
+  // Redirect to login/register if not authenticated, preserving the current path
   if (!isAuthenticated) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to={`/register?redirectTo=${location.pathname}`} replace />;
   }
 
   // Role-based routing
   if (user) {
     // Allow all authenticated users to access event routes and profile page
-    if (location.pathname.includes('/events') || location.pathname.includes('/profile')) {
+    if (location.pathname.includes('/events') || location.pathname.includes('/profile') || location.pathname.includes('/feedback')) {
       return <Outlet />;
     }
     

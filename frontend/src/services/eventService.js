@@ -4,6 +4,7 @@ import axios from "axios";
 // const API_URL = 'http://localhost:8001/api/auth';
 
 const API_URL = "http://localhost:8002/api/events";
+const FEEDBACK_API_URL = "http://localhost:8002/api/feedback";
 // Create axios instance with default config
 const eventApi = axios.create({
   baseURL: API_URL,
@@ -12,8 +13,26 @@ const eventApi = axios.create({
   },
 });
 
+const feedbackApi = axios.create({
+  baseURL: FEEDBACK_API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
+
 // Add token to requests if available
 eventApi.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem("token");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error),
+);
+
+feedbackApi.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
     if (token) {
@@ -149,6 +168,44 @@ const eventService = {
       );
     }
   },
+
+  // Organizer generates QR
+  generateFeedbackQr: async (eventId) => {
+    try {
+      console.log('event service eventIds:', eventId);
+      const res = await feedbackApi.get(`/qr/${eventId}`);
+      return res.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.message || "Failed to generate QR code",
+      );
+    }
+  },
+
+  // Participant submits feedback
+  submitFeedback: async (eventId, data) => {
+    try {
+      const res = await feedbackApi.post(`/${eventId}`, data);
+      return res.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.message || "Failed to submit feedback",
+      );
+    }
+  },
+
+  // Get feedbacks for an event (Organizer/Admin)
+  getEventFeedback: async (eventId) => {
+    try {
+      const res = await feedbackApi.get(`/${eventId}`);
+      return res.data;
+    } catch (error) {
+      throw new Error(
+        error.response?.data?.message || "Failed to fetch feedback"
+      );
+    }
+  },
+  
 };
 
 export default eventService;

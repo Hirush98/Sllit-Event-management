@@ -9,28 +9,33 @@ const EventDetailPage = () => {
   const { eventId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   const [event, setEvent] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [isRegistered, setIsRegistered] = useState(false);
   const [participants, setParticipants] = useState([]);
   const [showRegistrationForm, setShowRegistrationForm] = useState(false);
+  // Organizer state
+  const [feedbackQr, setFeedbackQr] = useState(null);
+  const [qrError, setQrError] = useState(null);
 
   // Check if user is an organizer or admin
   const isOrganizerOrAdmin = user && (user.role === 'organizer' || user.role === 'admin');
   // Check if user is the event creator
-  const isEventCreator = event && user && event.createdBy === user.id;
+  const isEventCreator = event && user && event.createdBy === user._id;
   // Check if user is a participant (not admin or organizer)
   // eslint-disable-next-line no-unused-vars
   const isParticipant = user && user.role === 'participant';
+
+  console.log('EventDetailPage rendered with eventId:', eventId);
 
   // Function to fetch event details
   const fetchEventDetails = async () => {
     try {
       setLoading(true);
       setError(null);
-      
+
       // Validate eventId before making API call
       if (!eventId) {
         setError('Invalid event ID');
@@ -39,14 +44,14 @@ const EventDetailPage = () => {
       }
 
       // console.log('Fetching event with ID:', eventId); // Debug log
-      
+
       const eventData = await eventService.getEventById(eventId);
       // console.log('Event data received:', eventData); // Debug log to see what's returned
       setEvent(eventData);
-      
+
       // Fetch participants in a separate call to avoid race conditions
       await fetchParticipants();
-      
+
     } catch (err) {
       console.error('Failed to fetch event details:', err);
       setError('Failed to load event details. Please try again later.');
@@ -58,20 +63,35 @@ const EventDetailPage = () => {
   // Function to fetch participants
   const fetchParticipants = async () => {
     if (!user || !eventId) return;
-    
+
     try {
       const participantsData = await eventService.getEventParticipants(eventId);
       // console.log('Participants data received:', participantsData); // Debug log
-      
+
       // Ensure we have an array of participants
-      const list = Array.isArray(participantsData) ? participantsData : 
-                  (participantsData && participantsData.data ? participantsData.data : []);
-      
+      const list = Array.isArray(participantsData) ? participantsData :
+        (participantsData && participantsData.data ? participantsData.data : []);
+
       setParticipants(list);
       setIsRegistered(list.some(p => p.userId === user.id));
     } catch (participantError) {
       console.warn('Failed to fetch participants:', participantError);
       setParticipants([]);
+    }
+  };
+
+  // Function to generate QR
+  const generateFeedbackQr = async () => {
+    try {
+      setQrError(null);      // Reset previous error before trying
+      setFeedbackQr(null);   // Reset previous QR
+
+      const res = await eventService.generateFeedbackQr(eventId);
+      // Backend returns { url, qrCode }
+      setFeedbackQr(res);  // store the entire object: { qrCode, url }
+    } catch (err) {
+      console.error('Failed to generate QR:', err);
+      setQrError(err.message || 'Failed to generate QR code. Try again.');
     }
   };
 
@@ -83,17 +103,17 @@ const EventDetailPage = () => {
       setError('No event ID provided');
       setLoading(false);
     }
-    
+
     // Set up polling to refresh participant data every 10 seconds
     const participantPolling = setInterval(() => {
       if (eventId && user) {
         fetchParticipants();
       }
     }, 10000); // 10 seconds
-    
+
     // Clean up interval on component unmount
     return () => clearInterval(participantPolling);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eventId, user]);
 
   const handleRegister = async () => {
@@ -102,13 +122,13 @@ const EventDetailPage = () => {
       navigate('/login', { state: { from: `/events/${eventId}` } });
       return;
     }
-    
+
     // Only allow participants to register
     if (user.role === 'admin' || user.role === 'organizer') {
       // console.log('Admins and organizers cannot register for events');
       return;
     }
-    
+
     setShowRegistrationForm(true);
   };
 
@@ -146,7 +166,7 @@ const EventDetailPage = () => {
     };
     return new Date(dateString).toLocaleDateString(undefined, options);
   };
-  
+
 
   // Show error if no eventId
   if (!eventId) {
@@ -246,7 +266,7 @@ const EventDetailPage = () => {
               <p className="mt-1 max-w-2xl text-sm text-gray-500">
                 Organized by{" "}
                 {event?.organizerName &&
-                event.organizerName.trim() !== "undefined undefined"
+                  event.organizerName.trim() !== "undefined undefined"
                   ? event.organizerName
                   : "Event Organizer"}
               </p>
@@ -304,7 +324,7 @@ const EventDetailPage = () => {
               <div className="bg-white px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                 <dt className="text-sm font-medium text-gray-500">Capacity</dt>
                 <dd className="mt-1 text-sm text-gray-900 sm:mt-0 sm:col-span-2">
-                {participants && event ? `${participants.length} / ${event.capacity || 0} registered` : 'Loading capacity information...'}
+                  {participants && event ? `${participants.length} / ${event.capacity || 0} registered` : 'Loading capacity information...'}
                 </dd>
               </div>
               {/* Removing duplicate Description section */}
@@ -329,6 +349,121 @@ const EventDetailPage = () => {
           </div>
         </div>
 
+        {isEventCreator && (
+          <div className="mt-6 bg-white shadow sm:rounded-lg">
+            <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Feedback QR
+                </h3>
+                <p className="text-sm text-gray-500">
+                  Generate and share feedback link with participants
+                </p>
+              </div>
+
+              <button
+                onClick={generateFeedbackQr}
+                className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
+              >
+                Generate QR
+              </button>
+            </div>
+
+            {feedbackQr && (
+              <div className="border-t border-gray-200 px-6 py-6 grid md:grid-cols-2 gap-6 items-center">
+
+                {/* QR Image */}
+                <div className="flex flex-col items-center">
+                  <img
+                    src={feedbackQr.qrCode}
+                    alt="Feedback QR"
+                    className="w-52 h-52 border rounded-lg shadow-sm"
+                  />
+
+                  {/* Download Button */}
+                  <button
+                    onClick={() => {
+                      const link = document.createElement("a");
+                      link.href = feedbackQr.qrCode;
+                      link.download = "feedback-qr.png";
+                      link.click();
+                    }}
+                    className="mt-4 px-4 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
+                  >
+                    Download QR
+                  </button>
+                </div>
+
+                {/* Link + Actions */}
+                <div>
+                  <p className="text-sm text-gray-700 mb-2">
+                    Share this link:
+                  </p>
+
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={feedbackQr.url}
+                      readOnly
+                      className="flex-1 px-3 py-2 border rounded-md text-sm text-gray-700 bg-gray-50"
+                    />
+
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(feedbackQr.url);
+                        alert("Link copied!");
+                      }}
+                      className="px-3 py-2 text-sm bg-gray-800 text-white rounded-md hover:bg-gray-900"
+                    >
+                      Copy
+                    </button>
+                  </div>
+
+                  {/* Open link */}
+                  <a
+                    href={feedbackQr.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-block mt-3 text-sm text-indigo-600 hover:underline"
+                  >
+                    Open Feedback Form →
+                  </a>
+                </div>
+              </div>
+            )}
+
+            {qrError && (
+              <div className="px-6 pb-4 text-sm text-red-500">
+                {qrError}
+              </div>
+            )}
+          </div>
+        )}
+
+        {isEventCreator && (
+          <div className="mt-6 bg-white shadow sm:rounded-lg">
+            <div className="px-4 py-5 sm:px-6 flex justify-between items-center">
+
+              <div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Event Feedback
+                </h3>
+                <p className="text-sm text-gray-500">
+                  View all participant feedback and ratings
+                </p>
+              </div>
+
+              <button
+                onClick={() => navigate(`/events/${eventId}/feedbacks`)}
+                className="inline-flex items-center px-4 py-2 text-sm font-medium rounded-md text-white bg-indigo-600 hover:bg-indigo-700 focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                View Feedback
+              </button>
+
+            </div>
+          </div>
+        )}
+
         {/* Registration section - only visible to participants */}
         {!isOrganizerOrAdmin && (
           <div className="mt-8 bg-white shadow sm:rounded-lg">
@@ -341,8 +476,8 @@ const EventDetailPage = () => {
                   {isRegistered
                     ? "You are registered for this event."
                     : participants && event && participants.length >= (event.capacity || 0)
-                    ? "This event has reached its capacity."
-                    : "Register to secure your spot for this event."}
+                      ? "This event has reached its capacity."
+                      : "Register to secure your spot for this event."}
                 </p>
               </div>
               <div className="mt-5">
@@ -357,11 +492,10 @@ const EventDetailPage = () => {
                   <button
                     onClick={handleRegister}
                     disabled={participants && event && participants.length >= (event.capacity || 0)}
-                    className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${
-                      participants && event && participants.length >= (event.capacity || 0)
-                        ? "bg-gray-400 cursor-not-allowed"
-                        : "bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
-                    }`}
+                    className={`inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white ${participants && event && participants.length >= (event.capacity || 0)
+                      ? "bg-gray-400 cursor-not-allowed"
+                      : "bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                      }`}
                   >
                     Register Now
                   </button>
@@ -417,7 +551,7 @@ const EventDetailPage = () => {
             </div>
           </div>
         )}
-        
+
         {/* Event Announcements Section */}
         <div className="mt-8">
           <EventAnnouncements eventId={eventId} eventTitle={event?.title} />
