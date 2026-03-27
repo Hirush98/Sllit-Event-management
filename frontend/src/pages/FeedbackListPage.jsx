@@ -2,9 +2,13 @@ import { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import eventService from "../services/eventService";
 import authService from "../services/authService";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 const FeedbackListPage = () => {
     const { eventId } = useParams();
+
+    const navigate = useNavigate();
 
     const [feedbacks, setFeedbacks] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -58,48 +62,66 @@ const FeedbackListPage = () => {
     return (
         <div className="min-h-screen ">
             <div className="max-w-4xl mx-auto space-y-6">
+                {/* Back button at the top */}
+                <div className="mb-6">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="text-indigo-600 hover:text-indigo-900 flex items-center"
+                    >
+                        <svg
+                            className="h-5 w-5 mr-1"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            stroke="currentColor"
+                        >
+                            <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth={2}
+                                d="M10 19l-7-7m0 0l7-7m-7 7h18"
+                            />
+                        </svg>
+                        Back
+                    </button>
+                </div>
                 {/* Header */}
-                <div className="bg-white rounded-2xl shadow-lg p-6 md:p-8 space-y-4">
+                <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 space-y-6">
                     {/* Header */}
-                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Event Feedback Summary</h1>
+                    <h1 className="text-3xl font-bold text-gray-900">Event Feedback Summary</h1>
 
                     {/* Total Responses & Average Rating */}
-                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                        <p className="text-gray-600 text-sm md:text-base">
-                            Total Responses: <span className="font-semibold text-gray-800">{feedbacks.length}</span>
+                    <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                        <p className="text-gray-700 text-lg md:text-xl">
+                            Total Responses: <span className="font-semibold text-gray-900">{feedbacks.length}</span>
                         </p>
-                        <div className="flex items-center text-yellow-500 text-lg md:text-xl font-semibold">
+                        <div className="flex items-center text-yellow-500 text-2xl font-bold">
                             ⭐ {avgRating} / 5
                         </div>
                     </div>
 
-                    {/* Star Breakdown */}
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-2">
-                        <div className="bg-yellow-50 rounded-xl py-2 px-3 flex flex-col items-center">
-                            <span className="text-yellow-500 font-bold">5⭐</span>
-                            <span className="text-gray-700 text-sm">12</span>
-                        </div>
-                        <div className="bg-yellow-50 rounded-xl py-2 px-3 flex flex-col items-center">
-                            <span className="text-yellow-500 font-bold">4⭐</span>
-                            <span className="text-gray-700 text-sm">8</span>
-                        </div>
-                        <div className="bg-yellow-50 rounded-xl py-2 px-3 flex flex-col items-center">
-                            <span className="text-yellow-500 font-bold">3⭐</span>
-                            <span className="text-gray-700 text-sm">3</span>
-                        </div>
-                        <div className="bg-yellow-50 rounded-xl py-2 px-3 flex flex-col items-center">
-                            <span className="text-yellow-500 font-bold">2⭐</span>
-                            <span className="text-gray-700 text-sm">1</span>
-                        </div>
-                        <div className="bg-yellow-50 rounded-xl py-2 px-3 flex flex-col items-center">
-                            <span className="text-yellow-500 font-bold">1⭐</span>
-                            <span className="text-gray-700 text-sm">0</span>
-                        </div>
+                    {/* Star Rating Breakdown with Progress Bars */}
+                    <div className="space-y-2">
+                        {[5, 4, 3, 2, 1].map((star) => {
+                            const count = star === 5 ? 12 : star === 4 ? 8 : star === 3 ? 3 : star === 2 ? 1 : 0; // Hardcoded for now
+                            const percent = ((count / feedbacks.length) * 100).toFixed(0);
+                            return (
+                                <div key={star} className="flex items-center gap-3">
+                                    <span className="text-yellow-500 font-semibold w-8">{star}⭐</span>
+                                    <div className="flex-1 bg-gray-200 rounded-full h-3 overflow-hidden">
+                                        <div
+                                            className="bg-yellow-400 h-3 rounded-full"
+                                            style={{ width: `${percent}%` }}
+                                        ></div>
+                                    </div>
+                                    <span className="text-gray-700 w-10 text-right font-medium">{count}</span>
+                                </div>
+                            );
+                        })}
                     </div>
 
                     {/* Quick Summary */}
-                    <p className="text-gray-600 text-sm md:text-base italic border-t border-gray-200 pt-3">
-                        Overall, attendees found the event engaging with mostly positive feedback. Most people appreciated the organization and content quality.
+                    <p className="text-gray-700 text-base md:text-lg italic border-t border-gray-200 pt-3">
+                        Overall, attendees found the event engaging, with most feedback being positive. The organization and content quality received high appreciation.
                     </p>
                 </div>
 
