@@ -150,7 +150,17 @@ const authService = {
     } catch (error) {
       throw new Error(error.response?.data?.message || 'Google login failed');
     }
-  }
+  },
+
+  // Fetch user by ID
+  getUserById: async (userId) => {
+    try {
+      const response = await authApi.get(`/users/${userId}`);
+      return response.data; // { success: true, user: { ... } }
+    } catch (error) {
+      throw new Error(error.response?.data?.message || 'Failed to fetch user');
+    }
+  },
 };
 
 export default authService;

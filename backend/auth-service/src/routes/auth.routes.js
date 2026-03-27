@@ -10,10 +10,10 @@ const {
   updateProfile,
   googleAuth,
   microsoftAuth,
-  registerUser
+  registerUser,
+  getUserById // ✅ import the new controller
 } = require('../controllers/auth.controller');
 const { protect } = require('../middleware/auth.middleware');
-
 
 const router = express.Router();
 
@@ -33,5 +33,8 @@ router.put('/profile', protect, updateProfile);
 // MS login
 router.post('/microsoft', microsoftAuth);
 router.post('/registerV2', registerUser);
+
+// ✅ New route: get user by ID (protected)
+router.get('/users/:id', protect, getUserById);
 
 module.exports = router;
