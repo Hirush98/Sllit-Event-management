@@ -50,13 +50,9 @@ exports.registerUser = async (req, res) => {
     const { idToken, studentId, name, address, mobileNo } = req.body;
 
     const decoded = await verifyMicrosoftToken(idToken);
-
     const email = decoded.preferred_username;
-    console.log("data received for registration:", { email, studentId, name, address, mobileNo });
 
-    /**if (!email.endsWith('@my.sliit.lk')) {
-      return res.status(403).json({ message: 'Invalid email domain' });
-    }*/
+    console.log("data received for registration:", { email, studentId, name, address, mobileNo });
 
     if (!email.endsWith('@gmail.com')) {
       return res.status(403).json({ message: 'Invalid email domain' });
@@ -66,6 +62,12 @@ exports.registerUser = async (req, res) => {
 
     if (existingUser) {
       return res.status(400).json({ message: 'User already exists' });
+    }
+
+    const existingStudent = await User.findOne({ studentId });
+    
+    if (existingStudent) {
+      return res.status(400).json({ message: 'Student ID already exists' });
     }
 
     const user = await User.create({

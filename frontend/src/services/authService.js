@@ -38,15 +38,11 @@ const authService = {
 
   // Register a new user v2
   registerV2: async (data) => {
-    try {
-      const res = await authApi.post('/registerV2', data);
-      if (res.data.token) {
-        localStorage.setItem('token', res.data.token);
-      }
-      return res.data;
-    } catch (error) {
-      throw new Error(error.response?.data?.message || 'Registration failed');
+    const res = await authApi.post('/registerV2', data);
+    if (res.data.token) {
+      localStorage.setItem('token', res.data.token);
     }
+    return res.data;
   },
 
   // Update user profile
